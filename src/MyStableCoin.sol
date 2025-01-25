@@ -1,15 +1,31 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {ERC20, ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract MyStableCoin is ERC20{
+/**
+ * @title MyStableCoin
+ * @author MaxBu
+ */
+contract MyStableCoin is ERC20, ERC20Burnable, Ownable{
+    error MyStableCoin__MustBeMoreThanZero();
+    error MyStableCoin__canNotMintToAddressZero();
 
-    uint256 public constant INITIAL_SUPPLY = 100e18;
+    constructor() ERC20("MyStableCoin", "MSC") Ownable(msg.sender){}
 
-    constructor() ERC20("MyStableCoin", "MSC"){}
+    function burn(uint256 amount) public override onlyOwner{
+        super.burn(amount);
+    }
 
-    function totalSupply() public pure override returns (uint256) {
-        return INITIAL_SUPPLY;
+    function mint(address to, uint256 amount) public onlyOwner{
+        if(to == address(0)){
+            revert MyStableCoin__canNotMintToAddressZero();
+        }
+
+        if (amount <= 0) {
+            revert MyStableCoin__MustBeMoreThanZero();
+        }
+        _mint(to, amount);
     }
 }
