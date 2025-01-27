@@ -1,8 +1,9 @@
 //SPDX-Liensce-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {MyStableCoin} from "../src/MyStableCoin.sol";
+import {ConfigHelper} from "../script/ConfigHelper.s.sol";
 
 /**
  * @title Engine
@@ -38,10 +39,10 @@ contract Engine {
 
     MyStableCoin immutable msc;
 
-    constructor(address wETH, address wBTC) {
+    constructor(ConfigHelper.NetConfig memory config) {
         msc = new MyStableCoin();
-        i_wETH = wETH;
-        i_wBTC = wBTC;
+        i_wETH = config.wETH;
+        i_wBTC = config.wBTC;
     }
 
     /**
