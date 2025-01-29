@@ -1,9 +1,11 @@
 //SPDX-Liensce-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {MyStableCoin} from "../src/MyStableCoin.sol";
-import {ConfigHelper} from "../script/ConfigHelper.s.sol";
+
+import { OracleLib, AggregatorV3Interface } from "./libraries/OracleLib.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { MyStableCoin } from "../src/MyStableCoin.sol";
+import { ConfigHelper } from "../script/ConfigHelper.s.sol";
 
 /**
  * @title Engine
@@ -23,6 +25,7 @@ contract Engine {
         wETH,
         wBTC
     }
+    using OracleLib for AggregatorV3Interface;
 
     address private immutable i_wETH;
     address private immutable i_wBTC;
