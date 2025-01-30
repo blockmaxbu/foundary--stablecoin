@@ -10,11 +10,11 @@ library OracleLib {
     error OracleLib__StalePrice();
 
     uint256 private constant TIMEOUT = 3 hours;
-    
+
     /**
      * Returns the latest answer.
      */
-    function getChainlinkDataFeedLatestAnswer(AggregatorV3Interface chainlinkFeed) 
+    function getDataFeedLatestAnswer(AggregatorV3Interface chainlinkFeed) 
         public
         view
         returns (uint80, int256, uint256, uint256, uint80)

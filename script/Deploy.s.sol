@@ -7,15 +7,13 @@ import {Engine} from "../src/Engine.sol";
 import {ConfigHelper} from "./ConfigHelper.s.sol";
 
 contract Deploy is Script{
-    address public engine;
+    // address public engine;
 
-    constructor() {
-    }
 
-    function run() external view returns (Engine, NetConfig memory) {
+    function run() external returns (Engine, ConfigHelper.NetConfig memory) {
         ConfigHelper configHelper = new ConfigHelper();
-        NetConfig calldata config = configHelper.activeNetConfig;
-        engine = new Engine(config);
+        ConfigHelper.NetConfig memory config = configHelper.activeNetConfig;
+        Engine engine = new Engine(config);
         return (engine, config);
     }
 }

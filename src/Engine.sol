@@ -1,6 +1,27 @@
 //SPDX-Liensce-Identifier: MIT
 pragma solidity ^0.8.24;
 
+// Layout of Contract:
+// version
+// imports
+// errors
+// interfaces, libraries, contracts
+// Type declarations
+// State variables
+// Events
+// Modifiers
+// Functions
+
+// Layout of Functions:
+// constructor
+// receive function (if exists)
+// fallback function (if exists)
+// external
+// public
+// internal
+// private
+// internal & private view & pure functions
+// external & public view & pure functions
 
 import { OracleLib, AggregatorV3Interface } from "./libraries/OracleLib.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -17,6 +38,7 @@ contract Engine {
     error Engine__DespositTansferFailed();
     error Engine__withDrawTansferFailed();
     error Engine__withdrawNotEnoughCollateral();
+    error Engine__collateralTypeNotSupport();
 
     event Engine_user_despoit(address indexed user, uint256 amount, TypeOfCollateral collateralType);
     event Engine_user_withdraw(address indexed user, uint256 amount, TypeOfCollateral collateralType);
@@ -25,11 +47,13 @@ contract Engine {
         wETH,
         wBTC
     }
-    
+
     using OracleLib for AggregatorV3Interface;
 
     address private immutable i_wETH;
     address private immutable i_wBTC;
+    address private immutable i_ETHUSDFeed;
+    address private immutable i_BTCUSDFeed;
 
     uint256 constant DEC = 10e18;
 
@@ -47,6 +71,8 @@ contract Engine {
         msc = new MyStableCoin();
         i_wETH = config.wETH;
         i_wBTC = config.wBTC;
+        i_BTCUSDFeed = config.BTCUSDFeed;
+        i_ETHUSDFeed = config.ETHUSDFeed;
     }
 
     /**
@@ -101,14 +127,23 @@ contract Engine {
      * @param collateralType the type of the collateral
      * @return the price of the collateral by using the Chainlink Price Feedsq
      */
-    function getPrice(TypeOfCollateral collateralType) private pure returns(uint256){
-        uint256 price;
+    function getPrice(TypeOfCollateral collateralType) private view returns(uint256){
+        address priceFeedAddress;
+        if(collateralType == TypeOfCollateral.wETH){
+            priceFeedAddress = i_ETHUSDFeed;
+        }else if (collateralType == TypeOfCollateral.wBTC){ 
+            priceFeedAddress = i_BTCUSDFeed;
+        }else {
+            revert Engine__collateralTypeNotSupport();
+        }
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(priceFeedAddress);
+        (, int256 price,,,) = priceFeed.getDataFeedLatestAnswer();
         if(collateralType == TypeOfCollateral.wETH){
             price = 3000;
         }else if(collateralType == TypeOfCollateral.wBTC){
             price = 100000;
         }
-        return price;
+        return uint256(price);
     }
 
     /**
@@ -128,7 +163,7 @@ contract Engine {
      * @param collateralType the type of the collateral
      * @param _amount the amount of the collateral user wants to get the value
      */
-    function getValue(TypeOfCollateral collateralType, uint256 _amount) public pure returns(uint256){
+    function getValue(TypeOfCollateral collateralType, uint256 _amount) public view returns(uint256){
         uint256 currentPrice = getPrice(collateralType);
         return _amount * currentPrice;
     }
