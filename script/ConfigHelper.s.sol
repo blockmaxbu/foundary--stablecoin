@@ -63,6 +63,9 @@ contract ConfigHelper is Script {
         });
     }
 
+    /**
+     * @notice this config is for the local anvil network
+     */
     function getAnvilConfig() public returns (NetConfig memory) {
         if(activeNetConfig.ETHUSDFeed != address(0)) {
             return activeNetConfig;
